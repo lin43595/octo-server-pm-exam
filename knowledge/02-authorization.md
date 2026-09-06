@@ -12,7 +12,7 @@
 这说明鉴权不是单一权限判断，而是组织级角色、频道级访问控制、Agent 身份门禁共同组成。
 
 边界：
-README 是高层描述，具体实现细节需要继续补查对应模块源码。
+README 是高层描述；具体 org RBAC / channel ACL 仍要结合各模块源码继续核验。
 
 ---
 
@@ -65,3 +65,44 @@ Bot API 使用统一认证中间件 `authBot()`，按 token 前缀区分 App Bot
 
 说明：
 这属于 bot/agent 身份门禁的一部分。不同 bot 类型进入不同认证路径，后续权限边界也不同。
+
+---
+
+## Q: App Bot 在复用 Bot API 读消息路由时有哪些额外门禁？
+
+结论：
+`appBotScopeGuard()` 对 Bot API authtree 复用路由补充 App Bot 授权：DM 读路由中，scope=space 的 App Bot 必须确认对端仍在它绑定的 Space；群/子区读路由中，App Bot 一律拒绝，因为 App Bot 是 DM-only。
+
+证据：
+- 来源: modules/bot_api/authtree_guard.go#L17-L45
+- 来源: modules/bot_api/authtree_guard.go#L46-L99
+
+说明：
+这补上了“读侧不能比写侧更宽”的权限缺口：如果对端已不在 App Bot 所属 Space，即使历史上存在 friend 行，也不能继续通过 message_id 读历史 DM 正文。
+
+---
+
+## Q: App Bot 为什么访问群/子区路由会被拒绝？
+
+结论：
+Bot API authtree guard 明确规定带 `:group_no` 的群/子区形状路由里，App Bot 要返回 `ErrBotAPIAppBotUnsupported` 并中止；注释说明 App Bot 是 DM-only。
+
+证据：
+- 来源: modules/bot_api/authtree_guard.go#L31-L45
+- 来源: modules/bot_api/authtree_guard.go#L54-L61
+
+说明：
+这体现了 bot/agent 身份门禁：App Bot 与 User Bot 的可操作面不同，App Bot 不应获得群操作能力。
+
+---
+
+## Q: App Bot scope=space 但认证链没有 app_bot_space_id 时怎么办？
+
+结论：
+这是认证链装配错误，读侧会 fail-closed，返回 `ErrMessageNotFound` 并中止，不放行。
+
+证据：
+- 来源: modules/bot_api/authtree_guard.go#L75-L84
+
+说明：
+权限链缺少关键上下文时采取 fail-closed，而不是降级放行。
