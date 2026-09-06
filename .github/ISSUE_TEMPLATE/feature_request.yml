@@ -1,0 +1,51 @@
+name: Feature Request
+description: 提交 octo-server 新需求
+title: "[Feature] "
+labels: ["type/feature", "status/triage"]
+body:
+  - type: textarea
+    id: user_problem
+    attributes:
+      label: 用户问题
+      description: 用户现在遇到什么不便？
+      placeholder: 请描述当前用户无法完成什么，或完成成本为什么高
+    validations:
+      required: true
+
+  - type: textarea
+    id: target_user
+    attributes:
+      label: 目标用户
+      description: 谁会使用这个能力？
+      placeholder: 例如：普通用户 / Space 管理员 / Bot 创建者 / 平台管理员
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired_outcome
+    attributes:
+      label: 期望结果
+      description: 用户完成后应该看到什么结果？
+      placeholder: 请用用户可感知的结果描述，不写技术实现
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      description: 不写接口字段、数据库、Redis、代码；只写用户可感知标准
+      placeholder: |
+        - 用户在 xxx 场景下可以看到 xxx
+        - 用户提交后 3 秒内看到成功或失败提示
+        - 失败时用户能看到明确原因和下一步建议
+    validations:
+      required: false
+
+  - type: textarea
+    id: source
+    attributes:
+      label: 来源
+      description: 来自哪次群聊/谁提出/相关上下文
+    validations:
+      required: false
