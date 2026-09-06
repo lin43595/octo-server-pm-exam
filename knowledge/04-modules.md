@@ -64,3 +64,9 @@ runtime/bot orchestration 已由单独的 octo-fleet 服务负责；`modules/run
 
 说明：
 这和考试红线“凭证不许出现在群里，也不许进 git”有关。Agent 可以管理密钥别名或检查可用性，但不能输出明文。
+
+## 当前启用状态校准
+
+注意：`modules/` 目录存在不等于当前启用。当前启用模块必须以 `internal/modules.go` 的 blank import 为准；截至本次检查，`botidentity`、`cardtrust`、`source` 目录存在但未被 `internal/modules.go` import。
+
+来源: internal/modules.go#L22-L78
