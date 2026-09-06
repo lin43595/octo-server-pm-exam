@@ -62,3 +62,44 @@ README 给出的启动方式是 `./octo-server --config ./configs/tsdd.yaml`。
 
 说明：
 考试如果问部署关系，可以回答：octo-server 是后端单仓库；完整一键部署看 octo-deployment。
+
+---
+
+## Q: Dockerfile 是怎么构建镜像的？
+
+结论：
+`Dockerfile` 是多阶段构建：第一阶段使用 `golang:1.25` 下载依赖并在仓库内 `go build` 生成静态二进制 `app`；第二阶段使用 `alpine:3.21` 作为运行镜像，复制 app、assets、configs，并以 `/home/app` 为 entrypoint。
+
+证据：
+- 来源: Dockerfile#L11-L32
+- 来源: Dockerfile#L35-L48
+
+说明：
+这个 Dockerfile 适合从源码直接构建运行镜像。
+
+---
+
+## Q: Dockerfile 如何处理没有 git tag 的 OSS 构建？
+
+结论：
+`Dockerfile` 对 `git describe --tags --abbrev=0` 增加 `2>/dev/null || echo dev` fallback；注释说明 OSS repo 可能 tags 被剥离，首次构建时 `git describe` 会失败，因此用 `dev` 保证构建通过。
+
+证据：
+- 来源: Dockerfile#L1-L9
+- 来源: Dockerfile#L26-L32
+
+说明：
+这是 OSS 发布环境和内部构建环境的差异处理。
+
+---
+
+## Q: Dockerfile.ghcr 和 Dockerfile 有什么区别？
+
+结论：
+`Dockerfile.ghcr` 不在镜像内编译 Go 源码，而是基于 `debian:bookworm-slim`，安装 ca-certificates/tzdata，复制 assets、configs，以及预构建的 `linux_${TARGETARCH}` 二进制为 `main`，最后 `CMD ["/app/main"]`。
+
+证据：
+- 来源: Dockerfile.ghcr#L1-L17
+
+说明：
+二者核心区别：`Dockerfile` 源码内构建；`Dockerfile.ghcr` 消费预构建产物，更像发布流水线产物打包。
