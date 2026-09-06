@@ -19,7 +19,7 @@ README 明确说 Lobster orchestration 是 first class，OpenClaw-powered digita
 ## Q: Bot/Agent 相关模块有哪些？
 
 结论：
-Bot/Agent 相关模块包括 robot、bot_mention、botfather、bot_api、app_bot、bot_provision、botidentity，以及 agentmailgateway 等。
+Bot/Agent 相关已启用模块包括 robot、bot_mention、botfather、bot_api、app_bot、bot_provision，以及 agentmailgateway 等；`botidentity` 目录存在但当前未被 `internal/modules.go` import，不应按已启用模块计入。
 
 证据：
 - 来源: internal/modules.go#L24-L33
